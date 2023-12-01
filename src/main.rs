@@ -1,7 +1,7 @@
 use std::env;
 use std::fs;
 
-use day::{Day, DayResult};
+use day::Day;
 use day1::Day1;
 
 pub mod day;
@@ -37,11 +37,11 @@ fn main() {
     let day = get_implementation_for_day_or_panic(day_number);
 
     match day.part1(input.as_str()) {
-        DayResult::Ok(answer) => println!("Part 1 Answer: {answer}"),
-        DayResult::Err(msg) => println!("Part 1 Error! {msg}"),
+        Ok(answer) => println!("Part 1 Answer: {answer}"),
+        Err(msg) => println!("Part 1 Error! {msg}"),
     };
     match day.part2(input.as_str()) {
-        DayResult::Ok(answer) => println!("Part 2 Answer: {answer}"),
-        DayResult::Err(msg) => println!("Part 2 Error! {msg}"),
+        Ok(answer) => println!("Part 2 Answer: {answer}"),
+        Err(msg) => println!("Part 2 Error! {msg}"),
     };
 }

@@ -1,22 +1,23 @@
-use crate::day::{Day, DayResult};
+use crate::day::Day;
+use std::fmt::Display;
 
 pub struct Day1 {}
 
 impl Day for Day1 {
-    fn part1(&self, input: &str) -> DayResult {
+    fn part1(&self, input: &str) -> Result<Box<dyn Display>, &str> {
         let mut sum_calibration = 0;
         for line in input.lines() {
             sum_calibration += get_digits_only_calibration_value_for_line(line);
         }
-        return DayResult::Ok(Box::new(sum_calibration));
+        return Ok(Box::new(sum_calibration));
     }
 
-    fn part2(&self, input: &str) -> DayResult {
+    fn part2(&self, input: &str) -> Result<Box<dyn Display>, &str> {
         let mut sum_calibration = 0;
         for line in input.lines() {
             sum_calibration += get_calibration_value_for_line(line);
         }
-        return DayResult::Ok(Box::new(sum_calibration));
+        return Ok(Box::new(sum_calibration));
     }
 }
 
