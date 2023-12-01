@@ -45,8 +45,7 @@ fn get_digits_only_calibration_value_for_line(line: &str) -> i32 {
     return calibration_value;
 }
 
-// Returns whether a fragment is a part of a number, starting from front.
-// Returns Ok(Some(number)) if it fully matches; Ok(None) if it matches partially, and Err() if it doesn't match.
+// Returns the digit that matches a given fragment, or None if it doesn't match.
 fn match_number(fragment: &str) -> Option<i32> {
     match fragment {
         "one" => return Some(1),
