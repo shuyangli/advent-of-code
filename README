@@ -1,0 +1,3 @@
+Learning Rust by doing Advent of Code 2023.
+
+To run: `cargo run -- {day_number}` where `day_number` is `1` to `25`.
