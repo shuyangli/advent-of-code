@@ -1,10 +1,22 @@
-use crate::day::Day;
+use crate::day::{Day, DayResult};
 
 pub struct Day1 {}
 
-impl Day1 {
-    pub fn new() -> Day1 {
-        return Day1 {};
+impl Day for Day1 {
+    fn part1(&self, input: &str) -> DayResult {
+        let mut sum_calibration = 0;
+        for line in input.lines() {
+            sum_calibration += get_digits_only_calibration_value_for_line(line);
+        }
+        return DayResult::Ok(Box::new(sum_calibration));
+    }
+
+    fn part2(&self, input: &str) -> DayResult {
+        let mut sum_calibration = 0;
+        for line in input.lines() {
+            sum_calibration += get_calibration_value_for_line(line);
+        }
+        return DayResult::Ok(Box::new(sum_calibration));
     }
 }
 
@@ -120,24 +132,6 @@ fn get_calibration_value_for_line(line: &str) -> i32 {
     }
 
     return calibration_value;
-}
-
-impl Day<i32> for Day1 {
-    fn part1(&self, input: &str) -> Result<i32, &str> {
-        let mut sum_calibration = 0;
-        for line in input.lines() {
-            sum_calibration += get_digits_only_calibration_value_for_line(line);
-        }
-        return Ok(sum_calibration);
-    }
-
-    fn part2(&self, input: &str) -> Result<i32, &str> {
-        let mut sum_calibration = 0;
-        for line in input.lines() {
-            sum_calibration += get_calibration_value_for_line(line);
-        }
-        return Ok(sum_calibration);
-    }
 }
 
 #[cfg(test)]

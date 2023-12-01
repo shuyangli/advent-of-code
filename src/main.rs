@@ -1,7 +1,7 @@
 use std::env;
 use std::fs;
 
-use day::Day;
+use day::{Day, DayResult};
 use day1::Day1;
 
 pub mod day;
@@ -21,16 +21,10 @@ fn read_input_or_panic(day: i32) -> String {
     return fs::read_to_string(filepath.as_str()).expect("Input file not found!");
 }
 
-fn run_implementation_for_day(_day: i32, input: &String) {
-    let day1 = Day1::new();
-
-    match day1.part1(input.as_str()) {
-        Ok(answer) => println!("Part 1 Answer: {}", answer),
-        Err(msg) => println!("Part 1 Error! {}", msg),
-    };
-    match day1.part2(input.as_str()) {
-        Ok(answer) => println!("Part 2 Answer: {}", answer),
-        Err(msg) => println!("Part 2 Error! {}", msg),
+fn get_implementation_for_day_or_panic(day: i32) -> Box<dyn Day> {
+    return match day {
+        1 => Box::new(Day1 {}),
+        _ => panic!("No implementation for provided day!"),
     };
 }
 
@@ -40,6 +34,14 @@ fn main() {
     println!("Advent of Code, Day {day_number}");
 
     let input = read_input_or_panic(day_number);
+    let day = get_implementation_for_day_or_panic(day_number);
 
-    run_implementation_for_day(day_number, &input);
+    match day.part1(input.as_str()) {
+        DayResult::Ok(answer) => println!("Part 1 Answer: {answer}"),
+        DayResult::Err(msg) => println!("Part 1 Error! {msg}"),
+    };
+    match day.part2(input.as_str()) {
+        DayResult::Ok(answer) => println!("Part 2 Answer: {answer}"),
+        DayResult::Err(msg) => println!("Part 2 Error! {msg}"),
+    };
 }
