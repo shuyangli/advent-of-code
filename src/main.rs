@@ -40,5 +40,6 @@ fn main() {
     println!("Advent of Code, Day {day_number}");
 
     let input = read_input_or_panic(day_number);
+
     run_implementation_for_day(day_number, &input);
 }
