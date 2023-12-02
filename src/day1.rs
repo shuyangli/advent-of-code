@@ -137,59 +137,66 @@ fn get_calibration_value_for_line(line: &str) -> i32 {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use googletest::prelude::*;
 
-    #[test]
+    #[googletest::test]
     fn get_digits_only_calibration_value_for_line_handles_empty() {
-        assert_eq!(get_digits_only_calibration_value_for_line(""), 0);
-        assert_eq!(get_digits_only_calibration_value_for_line("ob"), 0);
+        expect_that!(get_digits_only_calibration_value_for_line(""), eq(0));
+        expect_that!(get_digits_only_calibration_value_for_line("ob"), eq(0));
     }
 
-    #[test]
+    #[googletest::test]
     fn get_digits_only_calibration_value_for_line_handles_single_digit() {
-        assert_eq!(get_digits_only_calibration_value_for_line("1"), 11);
-        assert_eq!(get_digits_only_calibration_value_for_line("a1"), 11);
-        assert_eq!(get_digits_only_calibration_value_for_line("a1a"), 11);
-        assert_eq!(get_digits_only_calibration_value_for_line("aaaa1aaaaa"), 11);
+        expect_that!(get_digits_only_calibration_value_for_line("1"), eq(11));
+        expect_that!(get_digits_only_calibration_value_for_line("a1"), eq(11));
+        expect_that!(get_digits_only_calibration_value_for_line("a1a"), eq(11));
+        expect_that!(
+            get_digits_only_calibration_value_for_line("aaaa1aaaaa"),
+            eq(11)
+        );
     }
 
-    #[test]
+    #[googletest::test]
     fn get_digits_only_calibration_value_for_line_handles_double_digit() {
-        assert_eq!(get_digits_only_calibration_value_for_line("12"), 12);
-        assert_eq!(get_digits_only_calibration_value_for_line("1a2"), 12);
-        assert_eq!(get_digits_only_calibration_value_for_line("a1a2a"), 12);
-        assert_eq!(get_digits_only_calibration_value_for_line("a12b3ba2a"), 12);
+        expect_that!(get_digits_only_calibration_value_for_line("12"), eq(12));
+        expect_that!(get_digits_only_calibration_value_for_line("1a2"), eq(12));
+        expect_that!(get_digits_only_calibration_value_for_line("a1a2a"), eq(12));
+        expect_that!(
+            get_digits_only_calibration_value_for_line("a12b3ba2a"),
+            eq(12)
+        );
     }
 
-    #[test]
+    #[googletest::test]
     fn get_calibration_value_for_line_handles_empty() {
-        assert_eq!(get_calibration_value_for_line(""), 0);
-        assert_eq!(get_calibration_value_for_line("ob"), 0);
+        expect_that!(get_calibration_value_for_line(""), eq(0));
+        expect_that!(get_calibration_value_for_line("ob"), eq(0));
     }
 
-    #[test]
+    #[googletest::test]
     fn get_calibration_value_for_line_handles_single_digit() {
-        assert_eq!(get_calibration_value_for_line("1"), 11);
-        assert_eq!(get_calibration_value_for_line("a1"), 11);
-        assert_eq!(get_calibration_value_for_line("a1a"), 11);
-        assert_eq!(get_calibration_value_for_line("aaaa1aaaaa"), 11);
+        expect_that!(get_calibration_value_for_line("1"), eq(11));
+        expect_that!(get_calibration_value_for_line("a1"), eq(11));
+        expect_that!(get_calibration_value_for_line("a1a"), eq(11));
+        expect_that!(get_calibration_value_for_line("aaaa1aaaaa"), eq(11));
 
-        assert_eq!(get_calibration_value_for_line("one"), 11);
-        assert_eq!(get_calibration_value_for_line("aone"), 11);
-        assert_eq!(get_calibration_value_for_line("onea"), 11);
-        assert_eq!(get_calibration_value_for_line("onine"), 99);
+        expect_that!(get_calibration_value_for_line("one"), eq(11));
+        expect_that!(get_calibration_value_for_line("aone"), eq(11));
+        expect_that!(get_calibration_value_for_line("onea"), eq(11));
+        expect_that!(get_calibration_value_for_line("onine"), eq(99));
     }
 
-    #[test]
+    #[googletest::test]
     fn get_calibration_value_for_line_handles_double_digit() {
-        assert_eq!(get_calibration_value_for_line("12"), 12);
-        assert_eq!(get_calibration_value_for_line("1a2"), 12);
-        assert_eq!(get_calibration_value_for_line("a1a2a"), 12);
-        assert_eq!(get_calibration_value_for_line("a12b3ba2a"), 12);
+        expect_that!(get_calibration_value_for_line("12"), eq(12));
+        expect_that!(get_calibration_value_for_line("1a2"), eq(12));
+        expect_that!(get_calibration_value_for_line("a1a2a"), eq(12));
+        expect_that!(get_calibration_value_for_line("a12b3ba2a"), eq(12));
 
-        assert_eq!(get_calibration_value_for_line("oneone"), 11);
-        assert_eq!(get_calibration_value_for_line("oneaaaaone"), 11);
-        assert_eq!(get_calibration_value_for_line("abconeaaaaoneabce"), 11);
-        assert_eq!(get_calibration_value_for_line("oneintwo"), 12);
-        assert_eq!(get_calibration_value_for_line("seightwo"), 82);
+        expect_that!(get_calibration_value_for_line("oneone"), eq(11));
+        expect_that!(get_calibration_value_for_line("oneaaaaone"), eq(11));
+        expect_that!(get_calibration_value_for_line("abconeaaaaoneabce"), eq(11));
+        expect_that!(get_calibration_value_for_line("oneintwo"), eq(12));
+        expect_that!(get_calibration_value_for_line("seightwo"), eq(82));
     }
 }

@@ -129,12 +129,11 @@ fn parse_game_or_panic(line: &str) -> Game {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use googletest::prelude::*;
 
-    #[test]
+    #[googletest::test]
     fn parses_game_correctly() {
         let game = "Game 1: 3 blue, 4 red; 1 red, 2 green, 6 blue; 2 green";
-        let game = parse_game_or_panic(game);
-
         let expected_game = Game {
             id: 1,
             operations: vec![
@@ -155,6 +154,7 @@ mod tests {
                 },
             ],
         };
-        assert_eq!(game, expected_game);
+
+        expect_that!(parse_game_or_panic(game), eq(expected_game));
     }
 }
