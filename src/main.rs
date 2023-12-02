@@ -2,10 +2,10 @@ use std::env;
 use std::fs;
 
 use day::Day;
-use day1::Day1;
 
 pub mod day;
 pub mod day1;
+pub mod day2;
 
 fn read_day_number_or_panic() -> i32 {
     let mut args = env::args();
@@ -23,7 +23,8 @@ fn read_input_or_panic(day: i32) -> String {
 
 fn get_implementation_for_day_or_panic(day: i32) -> Box<dyn Day> {
     return match day {
-        1 => Box::new(Day1 {}),
+        1 => Box::new(day1::Day1 {}),
+        2 => Box::new(day2::Day2 {}),
         _ => panic!("No implementation for provided day!"),
     };
 }
