@@ -1,4 +1,6 @@
 use crate::day::Day;
+use once_cell::sync::Lazy;
+use regex::Regex;
 use std::fmt::Display;
 
 pub struct Day2 {}
@@ -85,40 +87,35 @@ impl Game {
     }
 }
 
-fn parse_game_or_panic(line: &str) -> Game {
-    let mut tokens = line.split(':');
+static GAME_REGEX: Lazy<Regex> =
+    Lazy::new(|| Regex::new(r"Game (?<game_id>\d+): (?<sequence>.*)$").unwrap());
+static ROUND_REGEX: Lazy<Regex> =
+    Lazy::new(|| Regex::new(r"(?<count>\d+) (?<color>red|green|blue)").unwrap());
 
-    let game_id: i32 = tokens
-        .next()
-        .unwrap()
-        .split(' ')
-        .next_back()
-        .unwrap()
-        .parse()
-        .expect("Error parsing Game ID!");
-    let game_sequence = tokens.next().expect("Expect at least 1 operation!");
+fn parse_game_or_panic(line: &str) -> Game {
+    let Some(caps) = GAME_REGEX.captures(line) else {
+        panic!("Error parsing game!")
+    };
+    let game_id = caps["game_id"]
+        .parse::<i32>()
+        .expect("Error parsing game ID!");
 
     let mut game = Game {
         id: game_id,
         operations: vec![],
     };
 
+    let game_sequence = &caps["sequence"];
     for round in game_sequence.split(';') {
-        let round = round.trim();
         let mut operation = Operation::new();
-        for color_count_pair in round.split(", ") {
-            let mut pair = color_count_pair.split_ascii_whitespace();
-            let count: i32 = pair
-                .next()
-                .unwrap()
-                .parse()
-                .expect("Error parsing cube count");
-            match pair.next() {
-                Some("green") => operation.green_count += count,
-                Some("red") => operation.red_count += count,
-                Some("blue") => operation.blue_count += count,
-                _ => panic!("Error parsing operation"),
-            }
+        for (_, [count, color]) in ROUND_REGEX.captures_iter(round).map(|c| c.extract()) {
+            let count = count.parse::<i32>().expect("Error parsing cube count");
+            match color {
+                "red" => operation.red_count += count,
+                "green" => operation.green_count += count,
+                "blue" => operation.blue_count += count,
+                _ => panic!("Unknown color"),
+            };
         }
         game.operations.push(operation);
     }
