@@ -41,7 +41,7 @@ fn parse_grid(input: &str) -> Vec<Vec<char>> {
 impl Day for Day3 {
     fn part1(&self, input: &str) -> Result<Box<dyn Display>, &str> {
         let characters = parse_grid(input);
-        let mut sum_part_numbers = 0;
+        let mut gears: HashMap<Gear, Vec<i32>> = HashMap::new();
 
         for (i, line) in characters.iter().enumerate() {
             let mut number_buffer = String::new();
@@ -55,36 +55,37 @@ impl Day for Day3 {
                     continue;
                 }
 
-                if number_buffer.is_empty() || starting_index.is_none() {
-                    continue;
+                if !number_buffer.is_empty() && starting_index.is_some() {
+                    let number = number_buffer.parse().expect("Failed to parse number");
+                    maybe_insert_gear(
+                        number,
+                        starting_index.unwrap(),
+                        j as i32 - 1,
+                        i as i32,
+                        &characters,
+                        &mut gears,
+                    );
+                    starting_index = None;
+                    number_buffer.clear();
                 }
-
-                // This is the end of a number; check if it's next to a gear.
-                if let Some(_) =
-                    get_adjacent_gear(starting_index.unwrap(), j as i32 - 1, i as i32, &characters)
-                {
-                    sum_part_numbers += number_buffer
-                        .parse::<i32>()
-                        .expect("Failed to parse number");
-                }
-
-                starting_index = None;
-                number_buffer.clear();
             }
-
-            // This is the end of a line, validate if the number is next to a gear
+            // This is the end of a line; process the gears.
             if !number_buffer.is_empty() && starting_index.is_some() {
-                if let Some(_) = get_adjacent_gear(
+                let number = number_buffer.parse().expect("Failed to parse number");
+                maybe_insert_gear(
+                    number,
                     starting_index.unwrap(),
                     line.len() as i32 - 1,
                     i as i32,
                     &characters,
-                ) {
-                    sum_part_numbers += number_buffer
-                        .parse::<i32>()
-                        .expect("Failed to parse number");
-                }
+                    &mut gears,
+                );
             }
+        }
+
+        let mut sum_part_numbers = 0;
+        for (_, numbers) in gears {
+            sum_part_numbers += numbers.iter().sum::<i32>();
         }
 
         return Ok(Box::new(sum_part_numbers));
@@ -106,45 +107,31 @@ impl Day for Day3 {
                     continue;
                 }
 
-                if number_buffer.is_empty() || starting_index.is_none() {
-                    continue;
+                if !number_buffer.is_empty() && starting_index.is_some() {
+                    let number = number_buffer.parse().expect("Failed to parse number");
+                    maybe_insert_gear(
+                        number,
+                        starting_index.unwrap(),
+                        j as i32 - 1,
+                        i as i32,
+                        &characters,
+                        &mut gears,
+                    );
+                    starting_index = None;
+                    number_buffer.clear();
                 }
-                let number = number_buffer.parse().expect("Failed to parse number");
-
-                // This is the end of a number; process the gears.
-                if let Some(gear) =
-                    get_adjacent_gear(starting_index.unwrap(), j as i32 - 1, i as i32, &characters)
-                {
-                    match gears.get_mut(&gear) {
-                        Some(numbers) => {
-                            numbers.push(number);
-                        }
-                        None => {
-                            gears.insert(gear, vec![number]);
-                        }
-                    }
-                }
-                starting_index = None;
-                number_buffer.clear();
             }
             // This is the end of a line; process the gears.
             if !number_buffer.is_empty() && starting_index.is_some() {
                 let number = number_buffer.parse().expect("Failed to parse number");
-                if let Some(gear) = get_adjacent_gear(
+                maybe_insert_gear(
+                    number,
                     starting_index.unwrap(),
                     line.len() as i32 - 1,
                     i as i32,
                     &characters,
-                ) {
-                    match gears.get_mut(&gear) {
-                        Some(numbers) => {
-                            numbers.push(number);
-                        }
-                        None => {
-                            gears.insert(gear, vec![number]);
-                        }
-                    }
-                }
+                    &mut gears,
+                );
             }
         }
 
@@ -155,6 +142,26 @@ impl Day for Day3 {
             }
         }
         return Ok(Box::new(sum_gear_ratios));
+    }
+}
+
+fn maybe_insert_gear(
+    number: i32,
+    starting_index: i32,
+    ending_index: i32,
+    line_number: i32,
+    grid: &Vec<Vec<char>>,
+    gears: &mut HashMap<Gear, Vec<i32>>,
+) {
+    if let Some(gear) = get_adjacent_gear(starting_index, ending_index, line_number, grid) {
+        match gears.get_mut(&gear) {
+            Some(numbers) => {
+                numbers.push(number);
+            }
+            None => {
+                gears.insert(gear, vec![number]);
+            }
+        }
     }
 }
 
