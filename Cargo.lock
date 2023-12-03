@@ -106,6 +106,7 @@ name = "rust-advent-2023"
 version = "0.1.0"
 dependencies = [
  "googletest",
+ "regex",
 ]
 
 [[package]]
