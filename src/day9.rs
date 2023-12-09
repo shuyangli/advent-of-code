@@ -7,6 +7,28 @@ struct Series {
     nums: Vec<i32>,
 }
 
+fn compute_differences(nums: &Vec<i32>) -> Vec<i32> {
+    nums.iter()
+        .zip(nums.iter().skip(1))
+        .map(|(a, b)| b - a)
+        .collect()
+}
+
+fn get_next(nums: &Vec<i32>) -> i32 {
+    if nums.iter().all(|f| *f == 0) {
+        return 0;
+    }
+
+    nums.last().unwrap() + get_next(&compute_differences(nums))
+}
+
+fn get_previous(nums: &Vec<i32>) -> i32 {
+    if nums.iter().all(|f| *f == 0) {
+        return 0;
+    }
+    nums.first().unwrap() - get_previous(&compute_differences(nums))
+}
+
 impl Series {
     fn parse_from_line(line: &str) -> Self {
         Series {
@@ -16,49 +38,6 @@ impl Series {
                 .collect(),
         }
     }
-
-    fn construct_stack(&self) -> Vec<Vec<i32>> {
-        let mut stack = vec![];
-
-        stack.push(self.nums.clone());
-        while stack.last().unwrap().iter().any(|v| *v != 0) {
-            let next_vec = stack.last().unwrap();
-            stack.push(
-                next_vec
-                    .iter()
-                    .zip(next_vec.iter().skip(1))
-                    .map(|(a, b)| b - a)
-                    .collect(),
-            );
-        }
-
-        // Pop the all-0 one
-        stack.pop();
-
-        return stack;
-    }
-
-    fn get_next_value(&self) -> i32 {
-        let mut stack = self.construct_stack();
-        let mut last_value = 0;
-
-        while !stack.is_empty() {
-            last_value = stack.pop().unwrap().last().unwrap() + last_value;
-        }
-
-        return last_value;
-    }
-
-    fn get_previous_value(&self) -> i32 {
-        let mut stack = self.construct_stack();
-        let mut previsou_value = 0;
-
-        while !stack.is_empty() {
-            previsou_value = stack.pop().unwrap().first().unwrap() - previsou_value;
-        }
-
-        return previsou_value;
-    }
 }
 
 impl Day for Day9 {
@@ -66,7 +45,7 @@ impl Day for Day9 {
         let answer: i32 = input
             .lines()
             .map(|l| Series::parse_from_line(l))
-            .map(|series| series.get_next_value())
+            .map(|series| get_next(&series.nums))
             .sum();
         return Ok(Box::new(answer));
     }
@@ -75,7 +54,7 @@ impl Day for Day9 {
         let answer: i32 = input
             .lines()
             .map(|l| Series::parse_from_line(l))
-            .map(|series| series.get_previous_value())
+            .map(|series| get_previous(&series.nums))
             .sum();
         return Ok(Box::new(answer));
     }
