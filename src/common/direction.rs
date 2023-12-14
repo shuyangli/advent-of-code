@@ -5,3 +5,14 @@ pub enum Direction {
     East,
     West,
 }
+
+impl Direction {
+    pub fn opposite(&self) -> Self {
+        match self {
+            Self::North => Self::South,
+            Self::South => Self::North,
+            Self::East => Self::West,
+            Self::West => Self::East,
+        }
+    }
+}

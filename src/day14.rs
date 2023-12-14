@@ -94,10 +94,14 @@ impl Day for Day14 {
         // Original grid is at index 0, so we start at 1 for convenience
         // Grid after X iterations = with index X, find the corresponding index in past_grids
         for j in 1_usize..=1000000000_usize {
-            inplace_slide_grid_in_direction(&mut grid, Direction::North);
-            inplace_slide_grid_in_direction(&mut grid, Direction::West);
-            inplace_slide_grid_in_direction(&mut grid, Direction::South);
-            inplace_slide_grid_in_direction(&mut grid, Direction::East);
+            for direction in [
+                Direction::North,
+                Direction::West,
+                Direction::South,
+                Direction::East,
+            ] {
+                inplace_slide_grid_in_direction(&mut grid, direction);
+            }
 
             if let Some((i, _)) = past_grids
                 .iter()

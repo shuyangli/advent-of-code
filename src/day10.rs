@@ -1,28 +1,10 @@
 use crate::common::direction::Direction;
+use crate::common::position::Position;
 use crate::day::Day;
 use core::panic;
 use std::fmt::Display;
 
 pub struct Day10 {}
-
-#[derive(Debug)]
-struct Position(i32, i32);
-
-impl Position {
-    // Get the next position by taking a step in the given direction
-    fn step(&self, direction: Direction) -> Self {
-        match direction {
-            Direction::North => Self(self.0 - 1, self.1),
-            Direction::South => Self(self.0 + 1, self.1),
-            Direction::East => Self(self.0, self.1 + 1),
-            Direction::West => Self(self.0, self.1 - 1),
-        }
-    }
-
-    fn is_valid_for<T>(&self, maze: &Vec<Vec<T>>) -> bool {
-        self.0 < 0 || self.0 >= maze.len() as i32 || self.1 < 0 || self.1 >= maze[0].len() as i32
-    }
-}
 
 struct Maze {
     maze: Vec<Vec<char>>,
@@ -34,7 +16,7 @@ fn get_starting_position(maze: &Vec<Vec<char>>) -> Position {
     for (i, line) in maze.iter().enumerate() {
         for (j, c) in line.iter().enumerate() {
             if *c == 'S' {
-                return Position(i as i32, j as i32);
+                return Position(i, j);
             }
         }
     }
@@ -59,40 +41,40 @@ impl Maze {
     fn mark_loop(&mut self, position: Position, from: Direction) -> Option<u32> {
         use Direction::*;
 
-        if position.is_valid_for(&self.maze) {
+        if !position.is_in_bounds(&self.maze) {
             return None;
         }
         return match self.maze[position.0 as usize][position.1 as usize] {
             'S' => Some(0),
             '.' => None,
             '|' => match from {
-                North => self.mark_loop(position.step(South), North),
-                South => self.mark_loop(position.step(North), South),
+                North => self.mark_loop(position.step(South)?, North),
+                South => self.mark_loop(position.step(North)?, South),
                 _ => None,
             },
             '-' => match from {
-                West => self.mark_loop(position.step(East), West),
-                East => self.mark_loop(position.step(West), East),
+                West => self.mark_loop(position.step(East)?, West),
+                East => self.mark_loop(position.step(West)?, East),
                 _ => None,
             },
             'L' => match from {
-                North => self.mark_loop(position.step(East), West),
-                East => self.mark_loop(position.step(North), South),
+                North => self.mark_loop(position.step(East)?, West),
+                East => self.mark_loop(position.step(North)?, South),
                 _ => None,
             },
             'J' => match from {
-                North => self.mark_loop(position.step(West), East),
-                West => self.mark_loop(position.step(North), South),
+                North => self.mark_loop(position.step(West)?, East),
+                West => self.mark_loop(position.step(North)?, South),
                 _ => None,
             },
             '7' => match from {
-                South => self.mark_loop(position.step(West), East),
-                West => self.mark_loop(position.step(South), North),
+                South => self.mark_loop(position.step(West)?, East),
+                West => self.mark_loop(position.step(South)?, North),
                 _ => None,
             },
             'F' => match from {
-                South => self.mark_loop(position.step(East), West),
-                East => self.mark_loop(position.step(South), North),
+                South => self.mark_loop(position.step(East)?, West),
+                East => self.mark_loop(position.step(South)?, North),
                 _ => None,
             },
             _ => None,
@@ -106,19 +88,15 @@ impl Maze {
     fn get_loop_size_and_mark_loop(&mut self) -> u32 {
         use Direction::*;
 
-        if let Some(distance) = self.mark_loop(self.starting_position.step(North), South) {
-            return distance;
+        for direction in [North, South, East, West] {
+            if let Some(distance) = self
+                .starting_position
+                .step(direction)
+                .and_then(|next_position| self.mark_loop(next_position, direction.opposite()))
+            {
+                return distance;
+            }
         }
-        if let Some(distance) = self.mark_loop(self.starting_position.step(South), North) {
-            return distance;
-        }
-        if let Some(distance) = self.mark_loop(self.starting_position.step(East), West) {
-            return distance;
-        }
-        if let Some(distance) = self.mark_loop(self.starting_position.step(West), East) {
-            return distance;
-        }
-
         panic!("No loop detected!");
     }
 
@@ -180,13 +158,12 @@ impl Day for Day10 {
 
         let mut num_spaces = 0;
         for (i, line) in maze.maze.iter().enumerate() {
-            if i as i32 == maze.starting_position.0 {
+            if i == maze.starting_position.0 {
                 // Starting line, we will partition from 'S' and count from both ends
-                num_spaces +=
-                    maze.count_empty_spaces_within_line(i, 0..maze.starting_position.1 as usize);
+                num_spaces += maze.count_empty_spaces_within_line(i, 0..maze.starting_position.1);
                 num_spaces += maze.count_empty_spaces_within_line(
                     i,
-                    (maze.starting_position.1 as usize + 1..line.len()).rev(),
+                    (maze.starting_position.1 + 1..line.len()).rev(),
                 )
             } else {
                 num_spaces += maze.count_empty_spaces_within_line(i, 0..line.len())
