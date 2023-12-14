@@ -1,3 +1,4 @@
+use crate::common::grid;
 use crate::day::Day;
 use std::fmt::Display;
 
@@ -6,12 +7,6 @@ pub struct Day13 {}
 #[derive(Debug)]
 struct Pattern {
     grid: Vec<Vec<char>>,
-}
-
-fn transpose_grid(grid: &Vec<Vec<char>>) -> Vec<Vec<char>> {
-    (0..grid[0].len())
-        .map(|col_idx| grid.iter().map(|row| row[col_idx]).collect())
-        .collect()
 }
 
 fn get_reflected_row(grid: &Vec<Vec<char>>) -> Option<usize> {
@@ -65,10 +60,6 @@ fn get_reflected_row_with_smudge(grid: &Vec<Vec<char>>) -> Option<usize> {
 }
 
 impl Pattern {
-    fn new() -> Self {
-        Self { grid: vec![] }
-    }
-
     // Returns the row index just above of the reflecting line.
     fn get_reflected_row(&self) -> Option<usize> {
         get_reflected_row(&self.grid)
@@ -76,7 +67,7 @@ impl Pattern {
 
     // Returns the column index just left of the reflecting line.
     fn get_reflected_column(&self) -> Option<usize> {
-        let transposed = transpose_grid(&self.grid);
+        let transposed = grid::transpose_grid(&self.grid);
         get_reflected_row(&transposed)
     }
 
@@ -87,33 +78,17 @@ impl Pattern {
 
     // Returns the column index just left of the reflecting line, reflecting the smudge.
     fn get_reflected_column_part2(&self) -> Option<usize> {
-        let transposed = transpose_grid(&self.grid);
+        let transposed = grid::transpose_grid(&self.grid);
         get_reflected_row_with_smudge(&transposed)
     }
 }
 
-fn parse_patterns(input: &str) -> Vec<Pattern> {
-    let mut patterns = vec![];
-    let mut lines = input.lines();
-
-    let mut pattern = Pattern::new();
-
-    while let Some(line) = lines.next() {
-        if line.is_empty() {
-            patterns.push(pattern);
-            pattern = Pattern::new();
-        } else {
-            pattern.grid.push(line.chars().collect());
-        }
-    }
-    patterns.push(pattern);
-
-    return patterns;
-}
-
 impl Day for Day13 {
     fn part1(&self, input: &str) -> Result<Box<dyn Display>, &str> {
-        let patterns = parse_patterns(input);
+        let patterns: Vec<_> = grid::parse_grids_separated_by_newline(input)
+            .into_iter()
+            .map(|grid| Pattern { grid })
+            .collect();
 
         let results: usize = patterns
             .iter()
@@ -131,7 +106,10 @@ impl Day for Day13 {
     }
 
     fn part2(&self, input: &str) -> Result<Box<dyn Display>, &str> {
-        let patterns = parse_patterns(input);
+        let patterns: Vec<_> = grid::parse_grids_separated_by_newline(input)
+            .into_iter()
+            .map(|grid| Pattern { grid })
+            .collect();
 
         let results: usize = patterns
             .iter()
@@ -169,7 +147,10 @@ mod tests {
 ###.#.###
 ..##.#..#
 ##.##.###";
-        let patterns = parse_patterns(input);
+        let patterns: Vec<_> = grid::parse_grids_separated_by_newline(input)
+            .into_iter()
+            .map(|grid| Pattern { grid })
+            .collect();
 
         expect_that!(patterns[0].get_reflected_row_part2(), eq(Some(6)));
     }
