@@ -1,16 +1,9 @@
+use crate::common::direction::Direction;
 use crate::day::Day;
 use core::panic;
 use std::fmt::Display;
 
 pub struct Day10 {}
-
-#[derive(Debug)]
-enum Direction {
-    North,
-    South,
-    East,
-    West,
-}
 
 #[derive(Debug)]
 struct Position(i32, i32);
