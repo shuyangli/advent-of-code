@@ -1,5 +1,6 @@
 use crate::common::direction::Direction;
 use crate::common::grid;
+use crate::common::position::Position;
 use crate::day::Day;
 use std::fmt::Display;
 
@@ -7,80 +8,33 @@ pub struct Day14 {}
 
 fn inplace_slide_rock_in_direction(
     grid: &mut Vec<Vec<char>>,
-    (i, j): (usize, usize),
+    position: Position,
     direction: Direction,
 ) {
-    if grid[i][j] != 'O' {
+    if !position.is_in_bounds(grid) {
+        return;
+    }
+    if grid[position.0][position.1] != 'O' {
         return;
     }
 
-    match direction {
-        Direction::North => {
-            for i_idx_to_check in (0..i).rev() {
-                match grid[i_idx_to_check][j] {
-                    '#' | 'O' => {
-                        // Cannot slide anymore
-                        return;
-                    }
-                    '.' => {
-                        grid[i_idx_to_check][j] = 'O';
-                        grid[i_idx_to_check + 1][j] = '.';
-                    }
-                    c => {
-                        panic!("Unexpected grid input {c}");
-                    }
-                }
-            }
+    let mut previous_position = position.clone();
+    while let Some(next_position) = previous_position.step(direction) {
+        if !next_position.is_in_bounds(grid) {
+            return;
         }
-        Direction::South => {
-            for i_idx_to_check in i + 1..grid.len() {
-                match grid[i_idx_to_check][j] {
-                    '#' | 'O' => {
-                        // Cannot slide anymore
-                        return;
-                    }
-                    '.' => {
-                        grid[i_idx_to_check][j] = 'O';
-                        grid[i_idx_to_check - 1][j] = '.';
-                    }
-                    c => {
-                        panic!("Unexpected grid input {c}");
-                    }
-                }
+        match grid[next_position.0][next_position.1] {
+            '#' | 'O' => {
+                // Cannot slide anymore
+                return;
             }
-        }
-        Direction::West => {
-            for j_idx_to_check in (0..j).rev() {
-                match grid[i][j_idx_to_check] {
-                    '#' | 'O' => {
-                        // Cannot slide anymore
-                        return;
-                    }
-                    '.' => {
-                        grid[i][j_idx_to_check] = 'O';
-                        grid[i][j_idx_to_check + 1] = '.';
-                    }
-                    c => {
-                        panic!("Unexpected grid input {c}");
-                    }
-                }
+            '.' => {
+                grid[next_position.0][next_position.1] = 'O';
+                grid[previous_position.0][previous_position.1] = '.';
+                previous_position = next_position;
             }
-        }
-        Direction::East => {
-            for j_idx_to_check in j + 1..grid[0].len() {
-                match grid[i][j_idx_to_check] {
-                    '#' | 'O' => {
-                        // Cannot slide anymore
-                        return;
-                    }
-                    '.' => {
-                        grid[i][j_idx_to_check] = 'O';
-                        grid[i][j_idx_to_check - 1] = '.';
-                    }
-                    c => {
-                        panic!("Unexpected grid input {c}");
-                    }
-                }
+            c => {
+                panic!("Unexpected grid input {c}");
             }
         }
     }
@@ -91,21 +45,21 @@ fn inplace_slide_grid_in_direction(grid: &mut Vec<Vec<char>>, direction: Directi
         Direction::North | Direction::West => {
             for i in 0..grid.len() {
                 for j in 0..grid[0].len() {
-                    inplace_slide_rock_in_direction(grid, (i, j), direction);
+                    inplace_slide_rock_in_direction(grid, Position(i, j), direction);
                 }
             }
         }
         Direction::South => {
             for i in (0..grid.len()).rev() {
                 for j in 0..grid[0].len() {
-                    inplace_slide_rock_in_direction(grid, (i, j), direction);
+                    inplace_slide_rock_in_direction(grid, Position(i, j), direction);
                 }
             }
         }
         Direction::East => {
             for i in 0..grid.len() {
                 for j in (0..grid[0].len()).rev() {
-                    inplace_slide_rock_in_direction(grid, (i, j), direction);
+                    inplace_slide_rock_in_direction(grid, Position(i, j), direction);
                 }
             }
         }
