@@ -1,6 +1,6 @@
 use crate::common::direction::Direction;
 
-#[derive(Clone, Copy, PartialEq, Eq, Debug)]
+#[derive(Clone, Copy, PartialEq, Eq, Debug, Hash)]
 pub struct Position(pub usize, pub usize);
 
 impl Position {
