@@ -13,16 +13,14 @@ fn step(
     next_positions: &mut Vec<(Position, Direction)>,
     position: &Position,
     heading: Direction,
-    grid: &Grid,
+    grid: &Grid<char>,
 ) {
-    if let Some(next_position) = position.step(heading) {
-        if next_position.is_in_bounds(&grid) {
-            next_positions.push((next_position, heading));
-        }
+    if let Some(next_position) = position.step_within_grid(heading, &grid) {
+        next_positions.push((next_position, heading))
     }
 }
 
-fn count_energized_tiles(grid: &Vec<Vec<char>>, starting: (Position, Direction)) -> usize {
+fn count_energized_tiles(grid: &Grid<char>, starting: (Position, Direction)) -> usize {
     let mut visited: HashSet<_> = HashSet::<(Position, Direction)>::new();
     let mut next_positions = vec![starting];
 

@@ -7,7 +7,7 @@ use std::fmt::Display;
 pub struct Day14 {}
 
 fn inplace_slide_rock_in_direction(
-    grid: &mut grid::Grid,
+    grid: &mut grid::Grid<char>,
     position: Position,
     direction: Direction,
 ) {
@@ -40,7 +40,7 @@ fn inplace_slide_rock_in_direction(
     }
 }
 
-fn inplace_slide_grid_in_direction(grid: &mut grid::Grid, direction: Direction) {
+fn inplace_slide_grid_in_direction(grid: &mut grid::Grid<char>, direction: Direction) {
     match direction {
         Direction::North | Direction::West => {
             for i in 0..grid.len() {
@@ -66,7 +66,7 @@ fn inplace_slide_grid_in_direction(grid: &mut grid::Grid, direction: Direction) 
     }
 }
 
-fn compute_load(grid: &grid::Grid) -> i32 {
+fn compute_load(grid: &grid::Grid<char>) -> i32 {
     let num_rows = grid.len();
 
     grid.iter()

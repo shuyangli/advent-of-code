@@ -26,6 +26,15 @@ impl Position {
         }
     }
 
+    pub fn step_within_grid<T>(&self, direction: Direction, grid: &Vec<Vec<T>>) -> Option<Self> {
+        let next_position = self.step(direction)?;
+        if next_position.is_in_bounds(grid) {
+            Some(next_position)
+        } else {
+            None
+        }
+    }
+
     pub fn is_in_bounds<T>(&self, grid: &Vec<Vec<T>>) -> bool {
         if grid.len() == 0 {
             println!("Position::is_in_bounds: received empty grid!");

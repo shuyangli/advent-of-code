@@ -1,3 +1,4 @@
+use crate::common::grid;
 use crate::day::Day;
 use std::{collections::HashMap, fmt::Display};
 
@@ -34,13 +35,9 @@ fn get_adjacent_gear(
     return None;
 }
 
-fn parse_grid(input: &str) -> Vec<Vec<char>> {
-    return input.lines().map(|l| l.chars().collect()).collect();
-}
-
 impl Day for Day3 {
     fn part1(&self, input: &str) -> Result<Box<dyn Display>, &str> {
-        let characters = parse_grid(input);
+        let characters = grid::parse_grid(input);
         let mut gears: HashMap<Gear, Vec<i32>> = HashMap::new();
 
         for (i, line) in characters.iter().enumerate() {
@@ -92,7 +89,7 @@ impl Day for Day3 {
     }
 
     fn part2(&self, input: &str) -> Result<Box<dyn Display>, &str> {
-        let characters = parse_grid(input);
+        let characters = grid::parse_grid(input);
         let mut gears: HashMap<Gear, Vec<i32>> = HashMap::new();
 
         for (i, line) in characters.iter().enumerate() {
