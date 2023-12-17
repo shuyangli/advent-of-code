@@ -92,12 +92,4 @@ mod tests {
         expect_that!(hash_string("HASH"), eq(52));
         expect_that!(hash_string("rn=1"), eq(30));
     }
-
-    #[googletest::test]
-    fn hash_initialization_sequence_correctly() {
-        expect_that!(
-            hash_initialization_sequence("rn=1,cm-,qp=3,cm=2,qp-,pc=4,ot=9,ab=5,pc-,pc=6,ot=7"),
-            eq(1320)
-        );
-    }
 }

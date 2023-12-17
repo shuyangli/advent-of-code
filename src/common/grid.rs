@@ -4,6 +4,16 @@ pub fn parse_grid(input: &str) -> Grid<char> {
     input.lines().map(|l| l.chars().collect()).collect()
 }
 
+pub fn parse_transform_grid<F, T>(input: &str, transform: F) -> Grid<T>
+where
+    F: Fn(char) -> T,
+{
+    input
+        .lines()
+        .map(|l| l.chars().map(|c| transform(c)).collect())
+        .collect()
+}
+
 pub fn parse_grids_separated_by_newline(input: &str) -> Vec<Grid<char>> {
     input.split("\n\n").map(parse_grid).collect()
 }
