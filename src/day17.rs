@@ -44,8 +44,6 @@ fn dijkstra_grid_for_minimum_heat_loss_part1(grid: &Grid<u32>) -> u32 {
     );
 
     while let Some((grid_state, _)) = next_positions.pop() {
-        println!("{:?}", grid_state);
-
         // How to more effectively shrink the search space?
         if visited_positions.contains_key(&grid_state.position)
             && grid_state.total_heat_loss - visited_positions[&grid_state.position] >= 10
@@ -124,8 +122,6 @@ fn dijkstra_grid_for_minimum_heat_loss_part2(grid: &Grid<u32>) -> u32 {
     );
 
     while let Some((grid_state, _)) = next_positions.pop() {
-        println!("{:?}", grid_state);
-
         if grid_state.position.0 == grid.len() - 1 && grid_state.position.1 == grid[0].len() - 1 {
             return grid_state.total_heat_loss;
         }
