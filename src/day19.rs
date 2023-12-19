@@ -1,13 +1,7 @@
+use crate::day::Day;
 use once_cell::sync::Lazy;
 use regex::Regex;
-
-use crate::day::Day;
-use std::{
-    cell::{Ref, RefCell},
-    collections::HashMap,
-    fmt::Display,
-    rc::Rc,
-};
+use std::{collections::HashMap, fmt::Display};
 
 pub struct Day19 {}
 
@@ -152,7 +146,6 @@ struct ConstraintRange {
     high: u64,
 }
 
-// These are pairs of [low, high), keyed by 'x', 'm', 'a', or 's'.
 #[derive(Debug, Clone)]
 struct Constraints(HashMap<char, ConstraintRange>);
 
@@ -178,7 +171,7 @@ impl Constraints {
 // A partition tree. Root is the entire world, leaves are nodes with acceptance conditions.
 #[derive(Debug)]
 struct Partition {
-    partitions: Vec<Rc<RefCell<Partition>>>,
+    partitions: Vec<Partition>,
     constraints: Option<Constraints>,
     acceptance: Option<NextStep>,
 }
@@ -195,8 +188,6 @@ impl Partition {
 
 // DFS through the ruleset, creating a tree of partitions ending in leaves.
 fn build_partition(ruleset: &HashMap<String, Vec<Rule>>) -> Partition {
-    let mut root = Partition::new();
-
     fn build_partition_helper(
         ruleset: &HashMap<String, Vec<Rule>>,
         parent_constraint: &Constraints,
@@ -233,7 +224,6 @@ fn build_partition(ruleset: &HashMap<String, Vec<Rule>>) -> Partition {
                 NextStep::Accept | NextStep::Reject => {
                     new_partition.acceptance = Some(r.next_step.clone());
                     new_partition.constraints = Some(current_constraint);
-                    root.partitions.push(Rc::new(RefCell::new(new_partition)));
                 }
                 NextStep::Goto(label) => {
                     build_partition_helper(
@@ -242,33 +232,31 @@ fn build_partition(ruleset: &HashMap<String, Vec<Rule>>) -> Partition {
                         &mut new_partition,
                         &label,
                     );
-                    root.partitions.push(Rc::new(RefCell::new(new_partition)));
                 }
             }
 
+            root.partitions.push(new_partition);
             current_constraint = next_constraint;
         }
     }
 
+    let mut root = Partition::new();
     build_partition_helper(ruleset, &Constraints::world(), &mut root, "in");
 
     return root;
 }
 
 fn get_possible_values_in_partition(partition: &Partition) -> u64 {
-    if let Some(acceptance) = &partition.acceptance {
-        if acceptance == &NextStep::Accept {
-            return partition.constraints.as_ref().unwrap().possible_values();
-        } else {
-            return 0;
-        }
+    match partition.acceptance {
+        Some(NextStep::Accept) => partition.constraints.as_ref().unwrap().possible_values(),
+        Some(NextStep::Reject) => 0,
+        Some(NextStep::Goto(_)) => panic!("Unexpected acceptance status"),
+        None => partition
+            .partitions
+            .iter()
+            .map(|child| get_possible_values_in_partition(child))
+            .sum::<u64>(),
     }
-
-    return partition
-        .partitions
-        .iter()
-        .map(|child| get_possible_values_in_partition(&child.borrow()))
-        .sum::<u64>();
 }
 
 impl Day for Day19 {
@@ -279,24 +267,24 @@ impl Day for Day19 {
         let answer: u64 = all_parts
             .iter()
             .map(|part| {
-                let mut rule_label: String = "in".to_string();
+                let mut rule_label = "in";
 
                 loop {
-                    let rule = &all_rules[&rule_label];
-                    'rule_loop: for r in rule {
+                    let rule = &all_rules[rule_label];
+                    for r in rule {
                         if let Some(next_step) = r.execute(part) {
                             match next_step {
                                 NextStep::Accept | NextStep::Reject => return (part, next_step),
                                 NextStep::Goto(label) => {
-                                    rule_label = label.clone();
-                                    break 'rule_loop;
+                                    rule_label = &label;
+                                    break;
                                 }
                             }
                         }
                     }
                 }
             })
-            .filter(|(_, n)| n == &&NextStep::Accept)
+            .filter(|&(_, n)| *n == NextStep::Accept)
             .map(|(p, _)| p.x + p.m + p.a + p.s)
             .sum();
 
