@@ -60,11 +60,7 @@ fn parse_dig_steps_part2(input: &str) -> Vec<DigStep> {
 fn compute_area_plus_border(steps: &Vec<DigStep>) -> i64 {
     let mut last_coordinates = Coordinates(0, 0);
     let mut interior_size = 0;
-
-    // Just need the larger one of the two.
-    let mut clockwise_exterior_size = 0_f64;
-    let mut counterclockwise_exterior_size = 0_f64;
-    let mut last_step = None;
+    let mut exterior_size = 0;
 
     for step in steps.as_slice() {
         let coordinates = last_coordinates.step(step.direction, step.steps);
@@ -73,42 +69,12 @@ fn compute_area_plus_border(steps: &Vec<DigStep>) -> i64 {
             interior_size += (coordinates.0 - last_coordinates.0) * coordinates.1;
         }
 
-        if last_step.is_none() {
-            last_step = Some(step.clone());
-            clockwise_exterior_size += step.steps as f64 * 0.5;
-            counterclockwise_exterior_size += step.steps as f64 * 0.5;
-            continue;
-        }
-
-        if last_step.unwrap().direction.rotate(90) == step.direction {
-            clockwise_exterior_size += step.steps as f64 * 0.5 + 0.25;
-            counterclockwise_exterior_size += step.steps as f64 * 0.5 - 0.25;
-        } else {
-            clockwise_exterior_size += step.steps as f64 * 0.5 - 0.25;
-            counterclockwise_exterior_size += step.steps as f64 * 0.5 + 0.25;
-        }
-
-        last_step = Some(step.clone());
+        exterior_size += step.steps;
         last_coordinates = coordinates;
     }
 
-    // Compute if we should add or substract 0.25 for completing the loop.
-    if last_step.unwrap().direction.rotate(90) == steps.first().unwrap().direction {
-        clockwise_exterior_size += 0.25;
-        counterclockwise_exterior_size -= 0.25;
-    } else {
-        clockwise_exterior_size -= 0.25;
-        counterclockwise_exterior_size += 0.25;
-    }
-
-    let is_clockwise = interior_size > 0;
-
-    return interior_size.abs()
-        + if is_clockwise {
-            clockwise_exterior_size as i64
-        } else {
-            counterclockwise_exterior_size as i64
-        };
+    // For the padding, each border piece gets 0.5 padding, and because turns cancel out each other, the 4 corners get 1 additional size.
+    return interior_size.abs() + exterior_size / 2 + 1;
 }
 
 impl Day for Day18 {
