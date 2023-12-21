@@ -66,6 +66,140 @@ fn count_reachable_grids(
     return num_matching_grids;
 }
 
+fn count_reachable_grids_repeating_infinitely(
+    grid: &Grid<char>,
+    starting_position: Position,
+    max_num_steps: i64,
+) -> i64 {
+    dbg!(max_num_steps);
+
+    // Looking at the input, the grid is a square, and there's always a Manhattan way to get around the grid,
+    // so we just need to calculate how many grids we can fully traverse and how far we can go along the edges.
+    let grid_length = grid.len() as i64;
+    let half_grid_length = starting_position.1 as i64;
+
+    let mut num_total_cells = 0_i64;
+
+    // Since the grid is 131 x 131, we need to consider both colors in the grid.
+    let reachable_squares_with_same_coloring =
+        count_reachable_grids(&grid, starting_position, 0, i64::MAX) as i64;
+    dbg!(reachable_squares_with_same_coloring);
+    let reachable_squares_with_opposite_coloring =
+        count_reachable_grids(&grid, starting_position, 1, i64::MAX) as i64;
+    dbg!(reachable_squares_with_opposite_coloring);
+
+    // Along each horizontal and vertical axis, how many grids can we fully traverse?
+    // 1-indexed
+    println!("On axes");
+    let n_grid_we_can_just_reach_on_axes = (max_num_steps - half_grid_length - 1) / grid_length + 1;
+    dbg!(n_grid_we_can_just_reach_on_axes);
+    let num_steps =
+        (n_grid_we_can_just_reach_on_axes - 1) * grid_length + half_grid_length as i64 + 1;
+    let num_steps_remaining = max_num_steps - num_steps;
+    dbg!(num_steps_remaining);
+
+    for position in [
+        Position(starting_position.0, (grid_length - 1) as usize),
+        Position(starting_position.0, 0),
+        Position((grid_length - 1) as usize, starting_position.1),
+        Position(0, starting_position.1),
+    ] {
+        // We can't fully traverse the grid at that position.
+        let num_cells_in_end_grid = count_reachable_grids(
+            grid,
+            position,
+            n_grid_we_can_just_reach_on_axes % 2,
+            num_steps_remaining,
+        );
+        dbg!(num_cells_in_end_grid);
+
+        // We also may not be able to fully traverse the grid just before it.
+        let num_steps_remaining = num_steps_remaining + grid_length;
+        let num_cells_in_grid_before_end = count_reachable_grids(
+            grid,
+            position,
+            (n_grid_we_can_just_reach_on_axes + 1) % 2,
+            num_steps_remaining,
+        );
+        dbg!(num_cells_in_grid_before_end);
+
+        num_total_cells += num_cells_in_end_grid + num_cells_in_grid_before_end;
+
+        // For the fully-traversed grids on that side, add up their cells.
+        // Opposite coloring
+        let num_fully_traversed_squares_with_opposite_coloring =
+            (n_grid_we_can_just_reach_on_axes - 1) / 2;
+        dbg!(num_fully_traversed_squares_with_opposite_coloring);
+        num_total_cells += num_fully_traversed_squares_with_opposite_coloring
+            * reachable_squares_with_opposite_coloring;
+        // Same coloring
+        let num_fully_traversed_squares_with_same_coloring =
+            (n_grid_we_can_just_reach_on_axes - 2) / 2;
+        dbg!(num_fully_traversed_squares_with_same_coloring);
+        num_total_cells +=
+            num_fully_traversed_squares_with_same_coloring * reachable_squares_with_same_coloring;
+    }
+
+    // On each diagonal, how many grids can we fully traverse?
+    println!("On diagonals");
+    let n_grids_we_can_just_reach_diagonally =
+        (max_num_steps - 2 * half_grid_length - 2) / grid_length + 1;
+    dbg!(n_grids_we_can_just_reach_diagonally);
+    let num_steps =
+        (n_grids_we_can_just_reach_diagonally - 1) * grid_length + half_grid_length as i64 * 2 + 2;
+    let num_steps_remaining = max_num_steps - num_steps;
+    dbg!(num_steps_remaining);
+
+    for position in [
+        Position(0, (grid_length - 1) as usize),
+        Position(0, 0),
+        Position((grid_length - 1) as usize, 0),
+        Position((grid_length - 1) as usize, (grid_length - 1) as usize),
+    ] {
+        // We can't fully traverse the grid at that position.
+        let num_cells_in_end_grid = count_reachable_grids(
+            grid,
+            position,
+            (n_grids_we_can_just_reach_diagonally + 1) % 2,
+            num_steps_remaining,
+        );
+        dbg!(num_cells_in_end_grid);
+
+        // We also may not be able to fully traverse the grid just before it.
+        let num_steps_remaining = num_steps_remaining + grid_length;
+        let num_cells_in_grid_before_end = count_reachable_grids(
+            grid,
+            position,
+            n_grid_we_can_just_reach_on_axes % 2,
+            num_steps_remaining,
+        );
+        dbg!(num_cells_in_grid_before_end);
+
+        num_total_cells += num_cells_in_end_grid * n_grids_we_can_just_reach_diagonally
+            + num_cells_in_grid_before_end * (n_grids_we_can_just_reach_diagonally - 1);
+
+        // For the fully-traversed grids on that diagonal, add up their cells.
+        // Same coloring
+        let num_fully_traversed_squares_with_same_coloring =
+            (n_grid_we_can_just_reach_on_axes - 1) * (n_grid_we_can_just_reach_on_axes - 1) / 4;
+        dbg!(num_fully_traversed_squares_with_same_coloring);
+        num_total_cells +=
+            num_fully_traversed_squares_with_same_coloring * reachable_squares_with_same_coloring;
+
+        // Opposite coloring
+        let num_fully_traversed_squares_with_opposite_coloring =
+            (n_grid_we_can_just_reach_on_axes - 3) * (n_grid_we_can_just_reach_on_axes - 1) / 4;
+        dbg!(num_fully_traversed_squares_with_opposite_coloring);
+        num_total_cells += num_fully_traversed_squares_with_opposite_coloring
+            * reachable_squares_with_opposite_coloring;
+    }
+
+    // We can fully traverse the center cell.
+    num_total_cells += reachable_squares_with_same_coloring;
+
+    return num_total_cells;
+}
+
 impl Day for Day21 {
     fn part1(&self, input: &str) -> Result<Box<dyn Display>, &str> {
         let grid = grid::parse_grid(input);
@@ -82,291 +216,13 @@ impl Day for Day21 {
     fn part2(&self, input: &str) -> Result<Box<dyn Display>, &str> {
         let grid = grid::parse_grid(input);
         let starting_position = get_starting_position(&grid);
-        println!("Starting position: {:?}", starting_position);
 
-        let grid_height = grid.len();
-        let grid_width = grid[0].len();
+        dbg!(starting_position);
 
-        // Since the grid is 131 x 131, we need to consider both colors in the grid.
-        let reachable_squares_with_same_coloring =
-            count_reachable_grids(&grid, starting_position, 0, i64::MAX) as i64;
-        let reachable_squares_with_opposite_coloring =
-            count_reachable_grids(&grid, starting_position, 1, i64::MAX) as i64;
-
-        // Looking at the input, there's always a Manhattan way to get around the grid,
-        // so we just need to calculate how far we can go on the edges.
-        const MAX_STEPS: i64 = 50;
-
-        // How many times can we walk directly in each diagonal?
-        let num_lengths_per_diagonal =
-            (MAX_STEPS - starting_position.0 as i64 - starting_position.1 as i64)
-                / grid_height as i64
-                - 1;
-
-        // Count full cells in all 4 diagonals.
-        let mut num_total_cells = 0_i64;
-        let num_squares_with_same_coloring_per_diagonal = if num_lengths_per_diagonal % 2 == 0 {
-            num_lengths_per_diagonal.pow(2) / 4
-        } else {
-            (num_lengths_per_diagonal + 1).pow(2) / 4
-        };
-        num_total_cells +=
-            num_squares_with_same_coloring_per_diagonal * reachable_squares_with_same_coloring * 4;
-
-        let num_squares_with_opposite_coloring_per_diagonal = if num_lengths_per_diagonal % 2 == 0 {
-            (num_lengths_per_diagonal + 2) * num_lengths_per_diagonal / 4
-        } else {
-            (num_lengths_per_diagonal + 1) * (num_lengths_per_diagonal - 1) / 4
-        };
-        num_total_cells += num_squares_with_opposite_coloring_per_diagonal
-            * reachable_squares_with_opposite_coloring
-            * 4;
-
-        // Count partial cells in 4 diagonals.
-        let num_nearer_partial_squares_per_diagonal = num_lengths_per_diagonal + 1;
-        let num_farther_partial_squares_per_diagonal = num_lengths_per_diagonal + 2;
-        let num_remaining_steps_for_farther_partial_diagonal_cell =
-            (MAX_STEPS - starting_position.0 as i64 - starting_position.1 as i64)
-                % grid_width as i64;
-        let num_remaining_steps_for_nearer_partial_diagonal_cell =
-            (MAX_STEPS - starting_position.0 as i64 - starting_position.1 as i64)
-                % grid_width as i64
-                + grid_width as i64;
-
-        if num_lengths_per_diagonal % 2 == 0 {
-            // Same coloring is nearer, opposite coloring is farther. We need to count 4 corners.
-            num_total_cells += num_nearer_partial_squares_per_diagonal
-                * count_reachable_grids(
-                    &grid,
-                    Position(0, grid_height - 1),
-                    0,
-                    num_remaining_steps_for_nearer_partial_diagonal_cell,
-                ) as i64;
-            num_total_cells += num_farther_partial_squares_per_diagonal
-                * count_reachable_grids(
-                    &grid,
-                    Position(0, grid_height - 1),
-                    1,
-                    num_remaining_steps_for_farther_partial_diagonal_cell,
-                ) as i64;
-            num_total_cells += num_nearer_partial_squares_per_diagonal
-                * count_reachable_grids(
-                    &grid,
-                    Position(0, 0),
-                    0,
-                    num_remaining_steps_for_nearer_partial_diagonal_cell,
-                ) as i64;
-            num_total_cells += num_farther_partial_squares_per_diagonal
-                * count_reachable_grids(
-                    &grid,
-                    Position(0, 0),
-                    1,
-                    num_remaining_steps_for_farther_partial_diagonal_cell,
-                ) as i64;
-            num_total_cells += num_nearer_partial_squares_per_diagonal
-                * count_reachable_grids(
-                    &grid,
-                    Position(grid_width - 1, grid_height - 1),
-                    0,
-                    num_remaining_steps_for_nearer_partial_diagonal_cell,
-                ) as i64;
-            num_total_cells += num_farther_partial_squares_per_diagonal
-                * count_reachable_grids(
-                    &grid,
-                    Position(grid_width - 1, grid_height - 1),
-                    1,
-                    num_remaining_steps_for_farther_partial_diagonal_cell,
-                ) as i64;
-            num_total_cells += num_nearer_partial_squares_per_diagonal
-                * count_reachable_grids(
-                    &grid,
-                    Position(grid_width - 1, 0),
-                    0,
-                    num_remaining_steps_for_nearer_partial_diagonal_cell,
-                ) as i64;
-            num_total_cells += num_farther_partial_squares_per_diagonal
-                * count_reachable_grids(
-                    &grid,
-                    Position(grid_width - 1, 0),
-                    1,
-                    num_remaining_steps_for_farther_partial_diagonal_cell,
-                ) as i64;
-        } else {
-            // Same coloring is nearer, opposite coloring is farther. We need to count 4 corners.
-            num_total_cells += num_nearer_partial_squares_per_diagonal
-                * count_reachable_grids(
-                    &grid,
-                    Position(0, grid_height - 1),
-                    1,
-                    num_remaining_steps_for_nearer_partial_diagonal_cell,
-                ) as i64;
-            num_total_cells += num_farther_partial_squares_per_diagonal
-                * count_reachable_grids(
-                    &grid,
-                    Position(0, grid_height - 1),
-                    0,
-                    num_remaining_steps_for_farther_partial_diagonal_cell,
-                ) as i64;
-            num_total_cells += num_nearer_partial_squares_per_diagonal
-                * count_reachable_grids(
-                    &grid,
-                    Position(0, 0),
-                    1,
-                    num_remaining_steps_for_nearer_partial_diagonal_cell,
-                ) as i64;
-            num_total_cells += num_farther_partial_squares_per_diagonal
-                * count_reachable_grids(
-                    &grid,
-                    Position(0, 0),
-                    0,
-                    num_remaining_steps_for_farther_partial_diagonal_cell,
-                ) as i64;
-            num_total_cells += num_nearer_partial_squares_per_diagonal
-                * count_reachable_grids(
-                    &grid,
-                    Position(grid_width - 1, grid_height - 1),
-                    1,
-                    num_remaining_steps_for_nearer_partial_diagonal_cell,
-                ) as i64;
-            num_total_cells += num_farther_partial_squares_per_diagonal
-                * count_reachable_grids(
-                    &grid,
-                    Position(grid_width - 1, grid_height - 1),
-                    0,
-                    num_remaining_steps_for_farther_partial_diagonal_cell,
-                ) as i64;
-            num_total_cells += num_nearer_partial_squares_per_diagonal
-                * count_reachable_grids(
-                    &grid,
-                    Position(grid_width - 1, 0),
-                    1,
-                    num_remaining_steps_for_nearer_partial_diagonal_cell,
-                ) as i64;
-            num_total_cells += num_farther_partial_squares_per_diagonal
-                * count_reachable_grids(
-                    &grid,
-                    Position(grid_width - 1, 0),
-                    0,
-                    num_remaining_steps_for_farther_partial_diagonal_cell,
-                ) as i64;
-        };
-
-        // How many times can we walk directly in each straight line?
-        let num_lengths_per_straight_line = num_lengths_per_diagonal + 1;
-        num_total_cells += num_lengths_per_straight_line / 2 * reachable_squares_with_same_coloring;
-        num_total_cells +=
-            (num_lengths_per_straight_line + 1) / 2 * reachable_squares_with_opposite_coloring;
-
-        let num_remaining_steps_for_farther_straight_cell =
-            (MAX_STEPS - starting_position.0 as i64) % grid_width as i64;
-        let num_remaining_steps_for_nearer_straight_cell =
-            (MAX_STEPS - starting_position.0 as i64) % grid_width as i64 + grid_width as i64;
-
-        if num_lengths_per_straight_line % 2 == 0 {
-            // Opposite is nearer, Same is farther
-            num_total_cells += count_reachable_grids(
-                &grid,
-                Position(starting_position.0, grid_height - 1),
-                0,
-                num_remaining_steps_for_nearer_straight_cell,
-            ) as i64;
-            num_total_cells += count_reachable_grids(
-                &grid,
-                Position(starting_position.0, grid_height - 1),
-                1,
-                num_remaining_steps_for_farther_straight_cell,
-            ) as i64;
-            num_total_cells += count_reachable_grids(
-                &grid,
-                Position(starting_position.0, 0),
-                0,
-                num_remaining_steps_for_nearer_straight_cell,
-            ) as i64;
-            num_total_cells += count_reachable_grids(
-                &grid,
-                Position(starting_position.0, 0),
-                1,
-                num_remaining_steps_for_farther_straight_cell,
-            ) as i64;
-            num_total_cells += count_reachable_grids(
-                &grid,
-                Position(grid_width - 1, starting_position.1),
-                0,
-                num_remaining_steps_for_nearer_straight_cell,
-            ) as i64;
-            num_total_cells += count_reachable_grids(
-                &grid,
-                Position(grid_width - 1, starting_position.1),
-                1,
-                num_remaining_steps_for_farther_straight_cell,
-            ) as i64;
-            num_total_cells += count_reachable_grids(
-                &grid,
-                Position(0, starting_position.1),
-                0,
-                num_remaining_steps_for_nearer_straight_cell,
-            ) as i64;
-            num_total_cells += count_reachable_grids(
-                &grid,
-                Position(0, starting_position.1),
-                1,
-                num_remaining_steps_for_farther_straight_cell,
-            ) as i64;
-        } else {
-            // Opposite is farther, Same is nearer
-            num_total_cells += count_reachable_grids(
-                &grid,
-                Position(starting_position.0, grid_height - 1),
-                1,
-                num_remaining_steps_for_nearer_straight_cell,
-            ) as i64;
-            num_total_cells += count_reachable_grids(
-                &grid,
-                Position(starting_position.0, grid_height - 1),
-                0,
-                num_remaining_steps_for_farther_straight_cell,
-            ) as i64;
-            num_total_cells += count_reachable_grids(
-                &grid,
-                Position(starting_position.0, 0),
-                1,
-                num_remaining_steps_for_nearer_straight_cell,
-            ) as i64;
-            num_total_cells += count_reachable_grids(
-                &grid,
-                Position(starting_position.0, 0),
-                0,
-                num_remaining_steps_for_farther_straight_cell,
-            ) as i64;
-            num_total_cells += count_reachable_grids(
-                &grid,
-                Position(grid_width - 1, starting_position.1),
-                1,
-                num_remaining_steps_for_nearer_straight_cell,
-            ) as i64;
-            num_total_cells += count_reachable_grids(
-                &grid,
-                Position(grid_width - 1, starting_position.1),
-                0,
-                num_remaining_steps_for_farther_straight_cell,
-            ) as i64;
-            num_total_cells += count_reachable_grids(
-                &grid,
-                Position(0, starting_position.1),
-                1,
-                num_remaining_steps_for_nearer_straight_cell,
-            ) as i64;
-            num_total_cells += count_reachable_grids(
-                &grid,
-                Position(0, starting_position.1),
-                0,
-                num_remaining_steps_for_farther_straight_cell,
-            ) as i64;
-        }
-
-        // Finally, count the starting square itself.
-        num_total_cells += count_reachable_grids(&grid, starting_position, 0, 64);
-
-        return Ok(Box::new(num_total_cells));
+        return Ok(Box::new(count_reachable_grids_repeating_infinitely(
+            &grid,
+            starting_position,
+            26501365,
+        )));
     }
 }
