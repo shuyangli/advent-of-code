@@ -1,3 +1,4 @@
+use super::grid::Grid;
 use crate::common::direction::Direction;
 
 #[derive(Clone, Copy, PartialEq, Eq, Debug, Hash)]
@@ -9,7 +10,7 @@ impl Position {
         self.step_by(direction, 1)
     }
 
-    // Get the next position by taking a step in the given direction by the
+    // Get the next position by taking a step in the given direction by the size.
     pub fn step_by(&self, direction: Direction, step_size: usize) -> Option<Self> {
         match direction {
             Direction::North => {
@@ -39,7 +40,7 @@ impl Position {
         &self,
         direction: Direction,
         step_size: usize,
-        grid: &Vec<Vec<T>>,
+        grid: &Grid<T>,
     ) -> Option<Self> {
         let next_position = self.step_by(direction, step_size)?;
         if next_position.is_in_bounds(grid) {
@@ -49,7 +50,7 @@ impl Position {
         }
     }
 
-    pub fn is_in_bounds<T>(&self, grid: &Vec<Vec<T>>) -> bool {
+    pub fn is_in_bounds<T>(&self, grid: &Grid<T>) -> bool {
         if grid.len() == 0 {
             println!("Position::is_in_bounds: received empty grid!");
             return false;

@@ -13,6 +13,7 @@ pub mod day18;
 pub mod day19;
 pub mod day2;
 pub mod day20;
+pub mod day21;
 pub mod day3;
 pub mod day4;
 pub mod day5;
@@ -43,6 +44,7 @@ pub fn get_implementation_for_day_or_panic(day: i32) -> Box<dyn day::Day> {
         18 => Box::new(day18::Day18 {}),
         19 => Box::new(day19::Day19 {}),
         20 => Box::new(day20::Day20 {}),
+        21 => Box::new(day21::Day21 {}),
         _ => panic!("No implementation for provided day!"),
     };
 }
