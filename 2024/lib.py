@@ -23,13 +23,20 @@ class Directions:
     NORTHWEST = Direction(-1, -1)
     SOUTHEAST = Direction(1, 1)
     SOUTHWEST = Direction(-1, 1)
-    FOUR_DIRECTIONS: List[Direction] = [
+
+    CARDINALS: List[Direction] = [
         NORTH,
         SOUTH,
         EAST,
         WEST,
     ]
-    EIGHT_DIRECTIONS: List[Direction] = [
+    ORDINALS: List[Direction] = [
+        NORTHEAST,
+        NORTHWEST,
+        SOUTHEAST,
+        SOUTHWEST,
+    ]
+    ALL: List[Direction] = [
         NORTH,
         SOUTH,
         EAST,
@@ -67,6 +74,11 @@ class Grid(Generic[T]):
     def __init__(self, grid: List[List[T]]) -> None:
         self.grid = grid
 
+    def parse_file_as_grid(filename: str) -> "Grid[str]":
+        with open(filename, "r") as file:
+            lines = file.readlines()
+        return Grid([list(l.strip()) for l in lines])
+
     # If (i, j) is out of bounds, return False.
     def matches(self, coord: Coordinate[int], value: T) -> bool:
         if coord.i() < 0 or coord.i() >= len(self.grid) or coord.j() < 0 or coord.j() >= len(self.grid[0]):
@@ -80,8 +92,3 @@ class Grid(Generic[T]):
         if len(self.grid) == 0:
             return 0
         return len(self.grid[0])
-
-def parse_file_as_grid(filename: str) -> Grid[str]:
-    with open(filename, "r") as file:
-        lines = file.readlines()
-    return Grid([list(l.strip()) for l in lines])
