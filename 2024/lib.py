@@ -1,5 +1,4 @@
 from typing import TypeVar, Generic, List
-from enum import Enum
 
 T = TypeVar('T')
 
