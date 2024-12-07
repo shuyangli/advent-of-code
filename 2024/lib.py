@@ -1,27 +1,44 @@
-from typing import TypeVar, Generic, List
+from typing import TypeVar, Generic, List, Optional
 
 T = TypeVar('T')
 
 class Direction(Generic[T]):
     def __init__(self, dx: T, dy: T) -> None:
-        self.dx = dx
-        self.dy = dy
+        self._dx = dx
+        self._dy = dy
 
+    @property
     def dx(self) -> T:
-        return self.dx
+        return self._dx
 
+    @property
     def dy(self) -> T:
-        return self.dy
+        return self._dy
+    
+    def rotate(self: "Direction[int]", degrees: int) -> "Direction[int]":
+        starting_index = Directions.ALL.index(self)
+        return Directions.ALL[(starting_index + degrees // 45) % len(Directions.ALL)]
+
+    def __str__(self) -> str:
+        return f"(dx={self.dx}, dy={self.dy})"
+    
+    def __eq__(self, other) -> bool:
+        if not isinstance(other, Direction):
+            return NotImplemented
+        return self.dx == other.dx and self.dy == other.dy
+
+    def __hash__(self) -> int:
+        return hash((self.dx, self.dy))
 
 class Directions:
-    NORTH = Direction(0, -1)
-    SOUTH = Direction(0, 1)
-    EAST = Direction(1, 0)
-    WEST = Direction(-1, 0)
-    NORTHEAST = Direction(1, -1)
+    NORTH = Direction(-1, 0)
+    SOUTH = Direction(1, 0)
+    EAST = Direction(0, 1)
+    WEST = Direction(0, -1)
+    NORTHEAST = Direction(-1, 1)
     NORTHWEST = Direction(-1, -1)
     SOUTHEAST = Direction(1, 1)
-    SOUTHWEST = Direction(-1, 1)
+    SOUTHWEST = Direction(1, -1)
 
     CARDINALS: List[Direction] = [
         NORTH,
@@ -37,13 +54,13 @@ class Directions:
     ]
     ALL: List[Direction] = [
         NORTH,
-        SOUTH,
-        EAST,
-        WEST,
         NORTHEAST,
-        NORTHWEST,
+        EAST,
         SOUTHEAST,
+        SOUTH,
         SOUTHWEST,
+        WEST,
+        NORTHWEST,
     ]
 
 class Coordinate(Generic[T]):
@@ -51,17 +68,29 @@ class Coordinate(Generic[T]):
         self.x = x
         self.y = y
     
+    @property
     def i(self) -> T:
         return self.x
+    
+    @i.setter
+    def i(self, value):
+        self.x = value
 
+    @property
     def j(self) -> T:
         return self.y
+    
+    @j.setter
+    def j(self, value):
+        self.y = value
 
-    def x(self) -> T:
-        return self.x
-
-    def y(self) -> T:
-        return self.y
+    def __str__(self) -> str:
+        return f"(x={self.x}, y={self.y})"
+    
+    def __eq__(self, other) -> bool:
+        if not isinstance(other, Coordinate):
+            return NotImplemented
+        return self.x == other.x and self.y == other.y
 
     def move(self, direction: Direction) -> "Coordinate[T]":
         return Coordinate(self.x + direction.dx, self.y + direction.dy)
@@ -77,12 +106,24 @@ class Grid(Generic[T]):
         with open(filename, "r") as file:
             lines = file.readlines()
         return Grid([list(l.strip()) for l in lines])
+    
+    def at(self, coord: Coordinate[int]) -> T:
+        if coord.i < 0 or coord.i >= len(self.grid) or coord.j < 0 or coord.j >= len(self.grid[0]):
+            raise ValueError(f"Coordinate {coord} is out of bounds!")
+        return self.grid[coord.i][coord.j]
+    
+    def find(self, value: T) -> Coordinate:
+        for i in range(len(self.grid)):
+            for j in range(len(self.grid[0])):
+                if self.grid[i][j] == value:
+                    return Coordinate(i, j)
+        raise ValueError(f"Value '{value}' not found!")
 
     # If (i, j) is out of bounds, return False.
     def matches(self, coord: Coordinate[int], value: T) -> bool:
-        if coord.i() < 0 or coord.i() >= len(self.grid) or coord.j() < 0 or coord.j() >= len(self.grid[0]):
+        if coord.i < 0 or coord.i >= len(self.grid) or coord.j < 0 or coord.j >= len(self.grid[0]):
             return False
-        return self.grid[coord.i()][coord.j()] == value
+        return self.grid[coord.i][coord.j] == value
     
     def num_rows(self) -> int:
         return len(self.grid)
