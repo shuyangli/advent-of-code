@@ -3,7 +3,7 @@ def part1():
         deltas: list[int] = []
         for i in range(len(levels) - 1):
             deltas.append(levels[i + 1] - levels[i])
-        
+
         for d in deltas:
             if (d > 0) != (deltas[0] > 0):
                 return False
@@ -36,7 +36,7 @@ def part2():
                 if abs(delta) > 3 or abs(delta) < 1:
                     return i
             return -1
-        
+
         # When we encounter the first violation, try removing one of the
         # two values at the violation and proceed with the validation.
         # Also if the index of the first violation is 1, try removing one of the
@@ -49,7 +49,7 @@ def part2():
         if i == 1 and first_violation(levels[1:]) == -1:
             return True
         return False
-    
+
     with open("inputs/day2", "r") as file:
         lines = file.readlines()
 

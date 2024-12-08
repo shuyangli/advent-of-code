@@ -9,7 +9,7 @@ def part1(grid: Grid[str]):
     for value, coords in grid.elements():
         if value != ".":
             letters_to_coords[value].append(coords)
-    
+
     antinode_coords = set()
     for _, coords in letters_to_coords.items():
         for i in range(len(coords)):
@@ -30,7 +30,7 @@ def part2(grid: Grid[str]):
     for value, coords in grid.elements():
         if value != ".":
             letters_to_coords[value].append(coords)
-    
+
     antinode_coords = set()
     for _, coords in letters_to_coords.items():
         for i in range(len(coords)):

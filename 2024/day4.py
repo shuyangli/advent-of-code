@@ -10,8 +10,8 @@ def part1():
             for dir in Directions.ALL:
                 if (
                     grid.matches(center, "X")
-                    and grid.matches(center.step(dir, 1), "M") 
-                    and grid.matches(center.step(dir, 2), "A") 
+                    and grid.matches(center.step(dir, 1), "M")
+                    and grid.matches(center.step(dir, 2), "A")
                     and grid.matches(center.step(dir, 3), "S")
                 ):
                     count += 1

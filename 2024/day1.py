@@ -11,7 +11,7 @@ def part1():
         [first, second] = line.split()
         first_list.append(int(first))
         second_list.append(int(second))
-    
+
     first_list.sort()
     second_list.sort()
 
