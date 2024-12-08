@@ -1,4 +1,4 @@
-from typing import TypeVar, Generic, List, Optional
+from typing import TypeVar, Generic, List, Generator, Tuple
 
 T = TypeVar('T')
 
@@ -91,6 +91,9 @@ class Coordinate(Generic[T]):
         if not isinstance(other, Coordinate):
             return NotImplemented
         return self.x == other.x and self.y == other.y
+    
+    def __hash__(self):
+        return hash((self.x, self.y))
 
     def move(self, direction: Direction) -> "Coordinate[T]":
         return Coordinate(self.x + direction.dx, self.y + direction.dy)
@@ -108,7 +111,7 @@ class Grid(Generic[T]):
         return Grid([list(l.strip()) for l in lines])
     
     def at(self, coord: Coordinate[int]) -> T:
-        if coord.i < 0 or coord.i >= len(self.grid) or coord.j < 0 or coord.j >= len(self.grid[0]):
+        if not self.is_in_bounds(coord):
             raise ValueError(f"Coordinate {coord} is out of bounds!")
         return self.grid[coord.i][coord.j]
     
@@ -121,9 +124,12 @@ class Grid(Generic[T]):
 
     # If (i, j) is out of bounds, return False.
     def matches(self, coord: Coordinate[int], value: T) -> bool:
-        if coord.i < 0 or coord.i >= len(self.grid) or coord.j < 0 or coord.j >= len(self.grid[0]):
+        if not self.is_in_bounds(coord):
             return False
         return self.grid[coord.i][coord.j] == value
+    
+    def is_in_bounds(self, coord: Coordinate[int]) -> bool:
+        return coord.i >= 0 and coord.i < len(self.grid) and coord.j >= 0 and coord.j < len(self.grid[0])
     
     def num_rows(self) -> int:
         return len(self.grid)
@@ -132,3 +138,8 @@ class Grid(Generic[T]):
         if len(self.grid) == 0:
             return 0
         return len(self.grid[0])
+    
+    def elements(self) -> Generator[Tuple[T, Coordinate[int]], None, None]:
+        for i in range(len(self.grid)):
+            for j in range(len(self.grid[0])):
+                yield (self.grid[i][j], Coordinate(i, j))
