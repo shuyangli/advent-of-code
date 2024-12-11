@@ -19,7 +19,7 @@ def traverse(grid: Grid):
             if (next.i, next.j, direction) in past_states:
                 raise LoopError
             try:
-                if grid.at(next) == "#":
+                if grid.get(next) == "#":
                     # Currently facing an obstacle
                     direction = direction.rotate(90)
                 else:
@@ -42,7 +42,7 @@ def part2(grid: Grid):
             if (i, j) not in visited:
                 # If the guard doesn't hit that position, we don't need to try anyways
                 continue
-            if grid.at(Coordinate(i, j)) != ".":
+            if grid.get(Coordinate(i, j)) != ".":
                 # Probably don't need this but good to check
                 continue
 

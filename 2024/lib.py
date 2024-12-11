@@ -1,4 +1,4 @@
-from typing import TypeVar, Generic, List, Generator, Tuple
+from typing import TypeVar, Generic, List, Generator, Tuple, Callable
 
 T = TypeVar('T')
 
@@ -85,7 +85,10 @@ class Coordinate(Generic[T]):
         self.y = value
 
     def __str__(self) -> str:
-        return f"(x={self.x}, y={self.y})"
+        return f"({self.x}, {self.y})"
+
+    def __repr__(self):
+        return self.__str__()
 
     def __eq__(self, other) -> bool:
         if not isinstance(other, Coordinate):
@@ -101,6 +104,7 @@ class Coordinate(Generic[T]):
     def step(self, direction: Direction, steps: int = 1) -> "Coordinate[T]":
         return Coordinate(self.x + steps * direction.dx, self.y + steps * direction.dy)
 
+
 class Grid(Generic[T]):
     def __init__(self, grid: List[List[T]]) -> None:
         self.grid = grid
@@ -110,16 +114,20 @@ class Grid(Generic[T]):
             lines = file.readlines()
         return Grid([list(l.strip()) for l in lines])
 
-    def at(self, coord: Coordinate[int]) -> T:
+    def get(self, coord: Coordinate[int]) -> T:
         if not self.is_in_bounds(coord):
             raise ValueError(f"Coordinate {coord} is out of bounds!")
         return self.grid[coord.i][coord.j]
 
+    def set(self, coord: Coordinate[int], value):
+        if not self.is_in_bounds(coord):
+            raise ValueError(f"Coordinate {coord} is out of bounds!")
+        self.grid[coord.i][coord.j] = value
+
     def find(self, value: T) -> Coordinate:
-        for i in range(len(self.grid)):
-            for j in range(len(self.grid[0])):
-                if self.grid[i][j] == value:
-                    return Coordinate(i, j)
+        for element, coords in self.elements():
+            if element == value:
+                return coords
         raise ValueError(f"Value '{value}' not found!")
 
     # If (i, j) is out of bounds, return False.
@@ -143,3 +151,6 @@ class Grid(Generic[T]):
         for i in range(len(self.grid)):
             for j in range(len(self.grid[0])):
                 yield (self.grid[i][j], Coordinate(i, j))
+
+    def __str__(self) -> str:
+        return "".join(["".join([str(character) for character in line]) + "\n" for line in self.grid])
