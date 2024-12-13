@@ -22,6 +22,9 @@ class Direction(Generic[T]):
     def __str__(self) -> str:
         return f"(dx={self.dx}, dy={self.dy})"
 
+    def __repr__(self):
+        return self.__str__()
+
     def __eq__(self, other) -> bool:
         if not isinstance(other, Direction):
             return NotImplemented
