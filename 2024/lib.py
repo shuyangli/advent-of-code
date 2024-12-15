@@ -109,13 +109,18 @@ class Coordinate(Generic[T]):
 
 
 class Grid(Generic[T]):
-    def __init__(self, grid: List[List[T]]) -> None:
-        self.grid = grid
+    def __init__(self, grid: List[List[T]] = None, width: int = None, height: int = None, init_value: T = None) -> None:
+        if grid is not None:
+            self.grid = grid
+        elif width is not None and height is not None:
+            self.grid = [[init_value for _ in range(width)] for _ in range(height)]
+        else:
+            raise ValueError("Failed to initialize grid")
 
     def parse_file_as_grid(filename: str) -> "Grid[str]":
         with open(filename, "r") as file:
             lines = file.readlines()
-        return Grid([list(l.strip()) for l in lines])
+        return Grid(grid=[list(l.strip()) for l in lines])
 
     def get(self, coord: Coordinate[int]) -> T:
         if not self.is_in_bounds(coord):

@@ -29,7 +29,7 @@ def part2(grid: Grid[int]):
             all_trailheads.append(coords)
 
     # Number of 9's one can reach from the given position, using the rules.
-    memoized_ratings: Grid[int | None] = Grid([[None for _ in range(len(grid.grid[0]))] for _ in range(len(grid.grid))])
+    memoized_ratings: Grid[int | None] = Grid(grid=[[None for _ in range(len(grid.grid[0]))] for _ in range(len(grid.grid))])
 
     def dfs(position: Coordinate, expected_value: int):
         if not grid.is_in_bounds(position):
@@ -57,7 +57,7 @@ def part2(grid: Grid[int]):
 
 def main():
     map = Grid.parse_file_as_grid("inputs/day10")
-    map = Grid([[int(v) for v in row] for row in map.grid])
+    map = Grid(grid=[[int(v) for v in row] for row in map.grid])
 
     print(f"Part 1: {part1(map)}")
     print(f"Part 2: {part2(map)}")
