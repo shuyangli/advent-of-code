@@ -47,13 +47,13 @@ def part2(grid: Grid):
                 continue
 
             # Try replacing that position with an obstacle and play it out
-            grid.grid[i][j] = "#"
+            grid[i][j] = "#"
             try:
                 _ = traverse(grid)
             except LoopError:
                 num_possible_new_obstructions += 1
             finally:
-                grid.grid[i][j] = "."
+                grid[i][j] = "."
 
     return num_possible_new_obstructions
 

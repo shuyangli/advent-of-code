@@ -40,10 +40,10 @@ def part2(robots: List[Robot], width, height):
             new_position.x %= width
             new_position.y %= height
 
-            if grid.grid[new_position.y][new_position.x] == ".":
-                grid.grid[new_position.y][new_position.x] = 1
+            if grid[new_position.y][new_position.x] == ".":
+                grid[new_position.y][new_position.x] = 1
             else:
-                grid.grid[new_position.y][new_position.x] += 1
+                grid[new_position.y][new_position.x] += 1
 
         grid_str = grid.__str__()
         if "11111111111" in grid_str:

@@ -122,6 +122,10 @@ class Grid(Generic[T]):
             lines = file.readlines()
         return Grid(grid=[list(l.strip()) for l in lines])
 
+    def parse_string_as_grid(grid_str: str) -> "Grid[str]":
+        lines = grid_str.strip().split("\n")
+        return Grid(grid=[list(l) for l in lines])
+
     def get(self, coord: Coordinate[int]) -> T:
         if not self.is_in_bounds(coord):
             raise ValueError(f"Coordinate {coord} is out of bounds!")
@@ -162,3 +166,9 @@ class Grid(Generic[T]):
 
     def __str__(self) -> str:
         return "".join(["".join([str(character) for character in line]) + "\n" for line in self.grid])
+
+    def __getitem__(self, key: int) -> List[T]:
+        return self.grid[key]
+
+    def __iter__(self):
+        return self.grid.__iter__()
