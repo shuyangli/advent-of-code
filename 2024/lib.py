@@ -30,6 +30,11 @@ class Direction(Generic[T]):
             return NotImplemented
         return self.dx == other.dx and self.dy == other.dy
 
+    def __lt__(self, other) -> bool:
+        if not isinstance(other, Direction):
+            return NotImplemented
+        return (self.dx, self.dy).__lt__((other.dx, other.dy))
+
     def __hash__(self) -> int:
         return hash((self.dx, self.dy))
 
@@ -97,6 +102,11 @@ class Coordinate(Generic[T]):
         if not isinstance(other, Coordinate):
             return NotImplemented
         return self.x == other.x and self.y == other.y
+
+    def __lt__(self, other) -> bool:
+        if not isinstance(other, Coordinate):
+            return NotImplemented
+        return (self.x, self.y).__lt__((other.x, other.y))
 
     def __hash__(self):
         return hash((self.x, self.y))
