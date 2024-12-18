@@ -22,7 +22,6 @@ def get_combo_operand(operand: int, registers: Registers) -> int:
         return registers.c
     raise ValueError(f"Invalid operand value {operand}")
 
-# (program_ptr, output)
 def execute(program: List[int], program_ptr: int, registers: Registers) -> int | None:
     if program_ptr < 0 or program_ptr >= len(program) - 1:
         # Halts
@@ -66,7 +65,7 @@ def part2(program: List[int]):
     # loop do
     # B = A % 0x111
     # B = B ^ 0x101
-    # C = A // B
+    # C = A // 2^B
     # B = B ^ 0x110
     # B = B ^ C
     # OUTPUT B % 0x111
@@ -75,36 +74,34 @@ def part2(program: List[int]):
     #
     # Register A can only get smaller, and we only need it 3 bits at a time
     # The final value is between 8^16 and 8^17 given output length.
-    for register_a in range(64):
-        print(f"Trying register_a={register_a}")
-        registers = Registers(register_a, 0, 0)
-        program_ptr = 0
-        while program_ptr is not None:
-            program_ptr = execute(program, program_ptr, registers)
-        print("Output : ", registers.output)
-        # print("Program: ", program)
-        # if registers.output == program:
-        #     return register_a
-        # elif len(registers.output) < len(program):
-        #     lower_bound = register_a
-        # elif len(registers.output) > len(program):
-        #     upper_bound = register_a
-        # else:
-        #     print("Same length, checking the lower values")
-        #     # This comparison is wrong. Can't just compare the values elementwise.
-        #     elementwise = zip(reversed(registers.output), reversed(program))
-        #     for r, p in elementwise:
-        #         if r < p:
-        #             lower_bound = register_a
-        #             break
-        #         elif r > p:
-        #             upper_bound = register_a
-        #             break
-        # register_a = (lower_bound + upper_bound) // 2
+    register_a = 0
+    print(f"Program to output: {program}")
 
-        # if lower_bound + 2 > upper_bound:
-        #     break
-    return "Did not terminate."
+    # (index, register_a so far)
+    values_to_search = [(len(program) - 1, 0)]
+
+    while values_to_search:
+        (idx, register_a) = values_to_search.pop(0)
+        if idx == -1:
+            print(f"Found answer! Answer: {register_a}")
+            continue
+
+        target_output = program[idx]
+        print(f"Next value to output (idx {idx}) is {target_output}; register_a so far is {register_a}")
+        shift = len(program) - 1 - idx
+        for next_three_bits_of_a in range(8):
+            register_b = next_three_bits_of_a
+            maybe_register_a = (register_a << (3 * shift)) | next_three_bits_of_a
+            print(f"b: {register_b}, maybe_a: {maybe_register_a}")
+            register_b = register_b ^ 5
+            register_c = maybe_register_a >> register_b
+            register_b = register_b ^ 6
+            register_c_target = register_b ^ target_output
+            if register_c == register_c_target:
+                print(f"Next 3 bits of a is {bin(next_three_bits_of_a)}")
+                values_to_search.append((idx - 1, maybe_register_a))
+
+    return "Didn't find answer."
 
 def main():
     with open("inputs/day17") as file:
