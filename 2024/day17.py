@@ -65,7 +65,7 @@ def part2(program: List[int]):
     # loop do
     # B = A % 0x111
     # B = B ^ 0x101
-    # C = A // 2^B
+    # C = A >> B
     # B = B ^ 0x110
     # B = B ^ C
     # OUTPUT B % 0x111
@@ -75,33 +75,28 @@ def part2(program: List[int]):
     # Register A can only get smaller, and we only need it 3 bits at a time
     # The final value is between 8^16 and 8^17 given output length.
     register_a = 0
-    print(f"Program to output: {program}")
+
+    all_answers = []
 
     # (index, register_a so far)
     values_to_search = [(len(program) - 1, 0)]
-
     while values_to_search:
         (idx, register_a) = values_to_search.pop(0)
         if idx == -1:
-            print(f"Found answer! Answer: {register_a}")
+            all_answers.append(register_a)
             continue
 
         target_output = program[idx]
-        print(f"Next value to output (idx {idx}) is {target_output}; register_a so far is {register_a}")
-        shift = len(program) - 1 - idx
         for next_three_bits_of_a in range(8):
             register_b = next_three_bits_of_a
-            maybe_register_a = (register_a << (3 * shift)) | next_three_bits_of_a
-            print(f"b: {register_b}, maybe_a: {maybe_register_a}")
+            maybe_register_a = (register_a << 3) | next_three_bits_of_a
             register_b = register_b ^ 5
-            register_c = maybe_register_a >> register_b
+            register_c = maybe_register_a // (2 ** register_b)
             register_b = register_b ^ 6
             register_c_target = register_b ^ target_output
-            if register_c == register_c_target:
-                print(f"Next 3 bits of a is {bin(next_three_bits_of_a)}")
+            if register_c % 8 == register_c_target:
                 values_to_search.append((idx - 1, maybe_register_a))
-
-    return "Didn't find answer."
+    return min(all_answers)
 
 def main():
     with open("inputs/day17") as file:
