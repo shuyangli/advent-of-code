@@ -1,6 +1,6 @@
 from typing import Tuple, Dict, DefaultDict, List
 from collections import defaultdict
-from lib import Coordinate, Grid, Directions
+from lib import Coordinate, Grid, Direction, Directions
 
 def bfs(grid: Grid[bool], starting_coord: Coordinate) -> List[Coordinate]:
     visited = set()
@@ -23,56 +23,31 @@ def bfs(grid: Grid[bool], starting_coord: Coordinate) -> List[Coordinate]:
     raise ValueError("Cannot find a path!")
 
 # Returns {steps => number of cheats}
-def bfs_with_cheats(grid: Grid[bool], starting_coord: Coordinate, allowed_cheats: int) -> DefaultDict[int, int]:
-    # First do a BFS without any cheats
-    path_without_cheats = bfs(grid, starting_coord)
+def shortcut_with_cheats(allowed_cheats: int, path_without_cheats: List[Coordinate]) -> DefaultDict[int, int]:
     length_without_cheats = len(path_without_cheats) - 1
+    coord_to_remaining_distance: Dict[Coordinate, int] = {}
+    for steps_so_far, coord in enumerate(path_without_cheats):
+        coord_to_remaining_distance[coord] = length_without_cheats - steps_so_far
 
-    visited: Dict[Coordinate, int] = {}
-    for i, coord in enumerate(path_without_cheats):
-        visited[coord] = length_without_cheats - i
-    print(visited)
-
-    # Then do a BFS with cheats
-    # Number of steps => number of options
     num_steps_with_cheating: DefaultDict[int, int] = defaultdict(lambda: 0)
-
-    # (current coordinate, number of cheats, currently cheating, number of steps taken)
-    visited_without_cheats = set()
-    options: List[Tuple[Coordinate, int, bool, int]] = []
-    options.append((starting_coord, allowed_cheats, False, 0))
-    while options:
-        (coordinate, remaining_cheats, cheating, num_steps) = options.pop()
-        if not grid.is_in_bounds(coordinate):
-            continue
-        if grid.get(coordinate) == "#" and not cheating:
-            continue
-
-        # If we've finished cheating, stop iterating.
-        if remaining_cheats <= 0:
-            if coordinate in visited:
-                num_steps_with_cheating[num_steps + visited[coordinate]] += 1
-            continue
-        # Otherwise maybe terminate if we have visited before
-        if not cheating and coordinate in visited_without_cheats:
-            continue
-        if not cheating and remaining_cheats == allowed_cheats:
-            visited_without_cheats.add(coordinate)
-
-        for d in Directions.CARDINALS:
-            next_coord = coordinate.step(d)
-            if cheating:
-                options.append((next_coord, remaining_cheats - 1, remaining_cheats - 1 > 0, num_steps + 1))
-            else:
-                options.append((next_coord, remaining_cheats, False, num_steps + 1))
-                options.append((next_coord, remaining_cheats - 1, True, num_steps + 1))
+    for steps_so_far, coord in enumerate(path_without_cheats):
+        for di in range(-allowed_cheats, allowed_cheats + 1):
+            remaining_cheats = allowed_cheats - abs(di)
+            for dj in range(-remaining_cheats, remaining_cheats + 1):
+                if di == 0 and dj == 0:
+                    continue
+                d = Direction(di, dj)
+                coord_after_cheat = coord.step(d)
+                if coord_after_cheat not in coord_to_remaining_distance:
+                    continue
+                num_total_steps = steps_so_far + abs(di) + abs(dj) + coord_to_remaining_distance[coord_after_cheat]
+                num_steps_with_cheating[num_total_steps] += 1
 
     return num_steps_with_cheating
 
-
-def part1(grid: Grid[str], starting_coord: Coordinate):
-    num_steps_without_cheating = len(bfs(grid, starting_coord)) - 1
-    num_steps_with_cheating = bfs_with_cheats(grid, starting_coord, allowed_cheats=2)
+def part1(path: List[Coordinate]):
+    num_steps_without_cheating = len(path) - 1
+    num_steps_with_cheating = shortcut_with_cheats(allowed_cheats=2, path_without_cheats=path)
 
     num_options_saving_one_hundred_ps = 0
     for steps, num_options in num_steps_with_cheating.items():
@@ -81,15 +56,24 @@ def part1(grid: Grid[str], starting_coord: Coordinate):
 
     return num_options_saving_one_hundred_ps
 
-def part2(grid: Grid[str], starting_coord: Coordinate):
-    return "Unimplemented"
+def part2(path: List[Coordinate]):
+    num_steps_without_cheating = len(path) - 1
+    num_steps_with_cheating = shortcut_with_cheats(allowed_cheats=20, path_without_cheats=path)
+
+    num_options_saving_one_hundred_ps = 0
+    for steps, num_options in num_steps_with_cheating.items():
+        if num_steps_without_cheating - steps >= 100:
+            num_options_saving_one_hundred_ps += num_options
+
+    return num_options_saving_one_hundred_ps
 
 def main():
     grid: Grid[str] = Grid.parse_file_as_grid("inputs/day20")
     starting_coord = grid.find("S")
+    path = bfs(grid, starting_coord)
 
-    print(f"Part 1: {part1(grid, starting_coord)}")
-    print(f"Part 2: {part2(grid, starting_coord)}")
+    print(f"Part 1: {part1(path)}")
+    print(f"Part 2: {part2(path)}")
 
 if __name__=="__main__":
     main()
