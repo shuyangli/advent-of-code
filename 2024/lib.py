@@ -117,7 +117,6 @@ class Coordinate(Generic[T]):
     def step(self, direction: Direction, steps: int = 1) -> "Coordinate[T]":
         return Coordinate(self.x + steps * direction.dx, self.y + steps * direction.dy)
 
-
 class Grid(Generic[T]):
     def __init__(self, grid: List[List[T]] = None, width: int = None, height: int = None, init_value: T = None) -> None:
         if grid is not None:
